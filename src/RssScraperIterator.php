@@ -175,13 +175,13 @@ class RssScraperIterator implements \Iterator, \Countable {
       catch (Exception $e) {
         throw new MigrateException("Unable to filter $url by " . $field['selector']);
       }
-      if (count($nodes) > 1) {
+      if ((isset($field['first']) && $field['first']) || count($nodes) == 1) {
+        $field_val = $this->parseNode($nodes->first(), $field);
+      }
+      elseif (count($nodes) > 1) {
         $field_val = $nodes->each(function ($node) use ($field) {
           return $this->parseNode($node, $field);
         });
-      }
-      elseif (count($nodes) == 1) {
-        $field_val = $this->parseNode($nodes->first(), $field);
       }
       else {
         $field_val = NULL;
