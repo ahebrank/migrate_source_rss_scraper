@@ -1,0 +1,10 @@
+{
+    "name": "drupal/migrate_source_rss_scraper",
+    "description": "Import items out of an RSS feed by scraping markup linked in the RSS",
+    "type": "drupal-module",
+    "require": {
+      "drupal/migrate_tools": "^4.0",
+      "drupal/migrate_plus": "^4.0",
+      "fabpot/goutte":"^3.0"
+    }
+}
