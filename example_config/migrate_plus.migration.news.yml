@@ -1,0 +1,59 @@
+id: news
+label: Import News
+migration_group: nodes
+source:
+  plugin: rss_scraper
+  rss_url: https://example.com/news.rss
+  fields:
+    -
+      name: title
+      selector: 'h1'
+      text: true
+    -
+      name: created
+      selector: '.pre-content .details'
+      text: true
+    -
+      name: image
+      selector: '.content-area img'
+      first: true
+      text: false
+      attr: src
+    -
+      name: body
+      selector: '.content-area'
+      text: false
+      html: true
+  ids:
+    title:
+      type: string
+destination:
+  plugin: entity:node
+process:
+  type:
+    plugin: default_value
+    default_value: news
+  title: title
+  body/value: body
+  body/format:
+    plugin: default_value
+    default_value: basic_html
+  created:
+    -
+      plugin: explode
+      source: created
+      delimiter: '/'
+    -
+      plugin: extract
+      index: 
+        - 0
+    -
+      plugin: trim
+    -
+      plugin: format_date
+      from_format: 'F j, Y'
+      to_format: 'U'
+  status:
+    plugin: default_value
+    default_value: 1
+
