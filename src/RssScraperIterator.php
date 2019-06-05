@@ -3,6 +3,7 @@
 namespace Drupal\migrate_source_rss_scraper;
 
 use Goutte\Client;
+use GuzzleHttp\Client as GuzzleClient;
 use SimpleXMLElement;
 use Drupal\migrate\MigrateException;
 
@@ -67,13 +68,22 @@ class RssScraperIterator implements \Iterator, \Countable {
    */
   public function __construct($config) {
     $this->client = new Client();
+    $guzzle = new GuzzleClient();
+    $guzzle_options = [];
+    if ($config['browser_agent']) {
+      $guzzle_options['headers'] = [
+        'User-Agent' => $config['browser_agent'],
+      ];
+    }
 
     $urls = $config['rss_url'];
 
     $items = [];
     foreach ((array) $urls as $listing_url) {
       try {
-        $feed = new SimpleXMLElement($listing_url, 0, TRUE);
+        $response = $guzzle->request('GET', $listing_url, $guzzle_options);
+        $data = $response->getBody();
+        $feed = new SimpleXMLElement($data);
         $page_items = array_map(function ($node) {
           $item_url = (string) $node->link;
           return $item_url;
