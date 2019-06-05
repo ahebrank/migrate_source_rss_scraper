@@ -2,8 +2,8 @@
 
 namespace Drupal\migrate_source_rss_scraper;
 
-use Goutte\Client;
-use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Client;
+use Symfony\Component\DomCrawler\Crawler;
 use SimpleXMLElement;
 use Drupal\migrate\MigrateException;
 
@@ -43,7 +43,7 @@ class RssScraperIterator implements \Iterator, \Countable {
   /**
    * Scraping client.
    *
-   * @var \Goutte\Client
+   * @var GuzzleHttp\Client
    */
   private $client;
 
@@ -67,8 +67,6 @@ class RssScraperIterator implements \Iterator, \Countable {
    * Use a set of list URLs and the DOM selector for links within those lists.
    */
   public function __construct($config) {
-    $this->client = new Client();
-    $guzzle = new GuzzleClient();
     $guzzle_options = [];
     if ($config['browser_agent']) {
       $guzzle_options['headers'] = [
@@ -76,12 +74,14 @@ class RssScraperIterator implements \Iterator, \Countable {
       ];
     }
 
+    $this->client = new Client($guzzle_options);
+
     $urls = $config['rss_url'];
 
     $items = [];
     foreach ((array) $urls as $listing_url) {
       try {
-        $response = $guzzle->request('GET', $listing_url, $guzzle_options);
+        $response = $this->client->request('GET', $listing_url);
         $data = $response->getBody();
         $feed = new SimpleXMLElement($data);
         $page_items = array_map(function ($node) {
@@ -172,12 +172,17 @@ class RssScraperIterator implements \Iterator, \Countable {
   private function getPage($url) {
     $data = [];
     try {
-      $crawler = $this->client->request('GET', $url);
+      $response = $this->client->request('GET', $url);
+      $crawler = new Crawler();
+      // Try to force correct encoding.
+      $crawler->addHtmlContent(
+        $response->getBody()->getContents(),
+        $response->getHeaderLine('Content-Type')
+      );
     }
     catch (Exception $e) {
       throw new MigrateException("Unable to parse $url");
     }
-    // echo "Scraping item $url\n";
     foreach ($this->fields as $field) {
       try {
         $nodes = $crawler->filter($field['selector']);
@@ -211,16 +216,14 @@ class RssScraperIterator implements \Iterator, \Countable {
     }
 
     // By default, grab the node text.
-    if (!isset($field_config['text']) || $field_config['text']) {
-      return $node->text();
-    }
-    elseif (isset($field_config['html']) && $field_config['html']) {
+    if (isset($field_config['html']) && $field_config['html']) {
       return $node->html();
     }
-    else {
-      if (isset($field_config['attr'])) {
-        return $node->attr($field_config['attr']);
-      }
+    elseif (isset($field_config['attr'])) {
+      return $node->attr($field_config['attr']);
+    }
+    elseif (!isset($field_config['text']) || $field_config['text']) {
+      return $node->text();
     }
     return NULL;
   }

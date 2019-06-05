@@ -14,21 +14,17 @@ source:
     -
       name: title
       selector: 'h1'
-      text: true
     -
       name: created
       selector: '.pre-content .details'
-      text: true
     -
       name: image
       selector: '.content-area img'
       first: true
-      text: false
       attr: src
     -
       name: body
       selector: '.content-area'
-      text: false
       html: true
   ids:
     title:
@@ -39,4 +35,4 @@ source:
 - `browser_agent`: optionally set (mimic) a custom browser agent
 - `fields`: defines the DOM target for field content within each item (which are read from URLs in the RSS feed).
 
-Each field definition contains a `selector` and information about how to retrieve the content: as `text` wrapped by the tag, as `html` from within the tag, or from an attribute on the tag. The `first` parameter may also be used to limit to the first tag found.
+Each field definition contains a `selector` and information about how to retrieve the content: as `text` wrapped by the tag (the default), as `html` from within the tag, or from an attribute `attr` on the tag. The `first` parameter may also be used to limit to the first tag found.
