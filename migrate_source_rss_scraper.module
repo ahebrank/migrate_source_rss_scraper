@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains migrate_source_rss_scraper.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function migrate_source_rss_scraper_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.migrate_source_rss_scraper':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides a migrate source plugin "rss_scraper" that is a combination of RSS feed 
+        reader and HTML scraper. It assumes a listing of (for example) news articles provided in RSS, where 
+        content for each article is scraped from HTML using the URL link in RSS. For more information, see 
+        README.md and the example_config directory.') . '</p>';
+      return $output;
+  }
+}

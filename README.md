@@ -1,4 +1,4 @@
-This plugin provides a migrate source plugin that's a combination of RSS feed reader and HTML scraper. It assumes a listing of (for example) news items provides in RSS, while content for each item is only available as HTML.
+This plugin provides a migrate source plugin `rss_scraper` that's a combination of RSS feed reader and HTML scraper. It assumes a listing of (for example) news articles provided in RSS, where content for each article is scraped from HTML using the URL link in RSS.
 
 An example migration configuration is provided in the `example_config` directory. 
 
