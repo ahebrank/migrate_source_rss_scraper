@@ -223,6 +223,8 @@ class RssScraperIterator implements \Iterator, \Countable {
         $field_val = NULL;
       }
 
+      $this->debugOutput("Found " . count($nodes) . " DOM node for selector " . $field['selector']);
+      $this->debugOutput("Using field value: " . (is_string($field_val) ? $field_val : (implode(' / ', $field_val) . ' (array)')));
       $data[$field['name']] = $field_val;
     }
     return $data;
