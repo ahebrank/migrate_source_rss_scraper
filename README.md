@@ -32,7 +32,9 @@ source:
 ```
 
 - `rss_url`: defines the RSS feed
-- `browser_agent`: optionally set (mimic) a custom browser agent
 - `fields`: defines the DOM target for field content within each item (which are read from URLs in the RSS feed).
+- `browser_agent`: optionally set (mimic) a custom browser agent
+- `http_delay`: optional delay (in seconds) between https requests
+- `debug`: optional configuration to log output to console (true/false)
 
 Each field definition contains a `selector` and information about how to retrieve the content: as `text` wrapped by the tag (the default), as `html` from within the tag, or from an attribute `attr` on the tag. The `first` parameter may also be used to limit to the first tag found.

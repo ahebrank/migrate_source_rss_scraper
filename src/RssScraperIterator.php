@@ -62,11 +62,27 @@ class RssScraperIterator implements \Iterator, \Countable {
   private $ids = [];
 
   /**
+   * Minimum delay (in seconds) between requests.
+   *
+   * @var int
+   */
+  private $delay = 0;
+
+  /**
+   * Output for debugging.
+   *
+   * @var bool
+   */
+  private $debug = FALSE;
+
+  /**
    * Initialize the iterator.
    *
    * Use a set of list URLs and the DOM selector for links within those lists.
    */
   public function __construct($config) {
+    $this->debug = (isset($config['debug']) && $config['debug']);
+
     $guzzle_options = [];
     if ($config['browser_agent']) {
       $guzzle_options['headers'] = [
@@ -77,9 +93,11 @@ class RssScraperIterator implements \Iterator, \Countable {
     $this->client = new Client($guzzle_options);
 
     $urls = $config['rss_url'];
+    $this->delay = isset($config['http_delay']) ? $config['http_delay'] : 0;
 
     $items = [];
     foreach ((array) $urls as $listing_url) {
+      $this->debugOutput("Reading RSS at $listing_url");
       try {
         $response = $this->client->request('GET', $listing_url);
         $data = $response->getBody();
@@ -93,6 +111,7 @@ class RssScraperIterator implements \Iterator, \Countable {
       catch (Exeception $e) {
         throw new MigrateException("Unable to parse RSS feed: " . $e->getMessage());
       }
+      sleep($this->delay);
     }
     $this->itemUrls = $items;
     $this->fields = $config['fields'];
@@ -156,7 +175,9 @@ class RssScraperIterator implements \Iterator, \Countable {
     }
 
     $url = $this->itemUrls[$i];
+    $this->debugOutput("Reading HTML $url");
     $this->currentItem = $this->getPage($url);
+    sleep($this->delay);
 
     if ($this->valid()) {
       $this->position = $i;
@@ -233,6 +254,15 @@ class RssScraperIterator implements \Iterator, \Countable {
    */
   public function get($key) {
     return $this->{$key};
+  }
+
+  /**
+   * Drush output.
+   */
+  private function debugOutput($message) {
+    if ($this->debug) {
+      echo "RSS_SCRAPER DEBUG: $message\n";
+    }
   }
 
 }
