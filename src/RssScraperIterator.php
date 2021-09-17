@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use Symfony\Component\DomCrawler\Crawler;
 use SimpleXMLElement;
 use Drupal\migrate\MigrateException;
+use GuzzleHttp\Psr7;
 
 /**
  * Implement the iterator used by the scraper.
@@ -194,11 +195,17 @@ class RssScraperIterator implements \Iterator, \Countable {
     $data = [];
     try {
       $response = $this->client->request('GET', $url);
+
+      // Parse charset from header.
+      $type = $response->getHeaderLine('content-type');
+      $parsed = Psr7\parse_header($type);
+      $charset = $parsed[0]['charset'];
+
       $crawler = new Crawler();
       // Try to force correct encoding.
       $crawler->addHtmlContent(
         $response->getBody()->getContents(),
-        $response->getHeaderLine('Content-Type')
+        $charset
       );
     }
     catch (Exception $e) {
