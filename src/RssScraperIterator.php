@@ -154,7 +154,7 @@ class RssScraperIterator implements \Iterator, \Countable {
    * {@inheritdoc}
    */
   public function rewind() {
-    $this->currentId = NULL;
+    $this->position = NULL;
     $this->next();
   }
 
